@@ -74,3 +74,20 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# VS Code
+.vscode/
+
+# IDE
+*.swp
+*.swo
+*~
+
+# Expo (ถ้าใช้ในอนาคต)
+.expo/
+.expo-shared/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
