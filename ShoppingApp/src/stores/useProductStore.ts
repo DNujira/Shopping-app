@@ -1,7 +1,10 @@
-import { create } from 'zustand';
-import { Product, CartItem } from '../types/product';
-import { apiService } from '../services/api';
-import { calculatePairDiscountPromotion, PromotionResult } from '../utils/promotionCalculator';
+import { create } from "zustand";
+import { Product, CartItem } from "../types/product";
+import { apiService } from "../services/api";
+import {
+  calculatePairDiscountPromotion,
+  PromotionResult,
+} from "../utils/promotionCalculator";
 
 interface ProductStore {
   products: Product[];
@@ -28,7 +31,7 @@ interface ProductStore {
   getCartTotal: () => number;
   getCartItemsCount: () => number;
   getCartItem: (productId: number) => CartItem | undefined;
-  getCartPromotionDetails: () => PromotionResult;
+  getCartPromotionDetails: (code: string) => PromotionResult;
 }
 
 export const useProductStore = create<ProductStore>((set, get) => ({
@@ -55,13 +58,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
         });
       } else {
         set({
-          error: response.message || 'Failed to fetch products',
+          error: response.message || "Failed to fetch products",
           loading: false,
         });
       }
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'An error occurred',
+        error: error instanceof Error ? error.message : "An error occurred",
         loading: false,
       });
     }
@@ -71,7 +74,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     set({ recommendLoading: true, error: null });
     try {
       const response = await apiService.recommendProduct();
-      console.log('response--->>', response);
+      console.log("response--->>", response);
       if (response.success && response.data) {
         set({
           recommendedProducts: response.data,
@@ -79,13 +82,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
         });
       } else {
         set({
-          error: response.message || 'Failed to fetch recommended products',
+          error: response.message || "Failed to fetch recommended products",
           recommendLoading: false,
         });
       }
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'An error occurred',
+        error: error instanceof Error ? error.message : "An error occurred",
         recommendLoading: false,
       });
     }
@@ -108,13 +111,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
         });
       } else {
         set({
-          error: response.message || 'Failed to load more products',
+          error: response.message || "Failed to load more products",
           loading: false,
         });
       }
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'An error occurred',
+        error: error instanceof Error ? error.message : "An error occurred",
         loading: false,
       });
     }
@@ -126,14 +129,14 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
   addToCart: (product: Product) => {
     const { cart } = get();
-    const existingItem = cart.find(item => item.id === product.id);
+    const existingItem = cart.find((item) => item.id === product.id);
 
     if (existingItem) {
       set({
-        cart: cart.map(item =>
+        cart: cart.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
-            : item,
+            : item
         ),
       });
     } else {
@@ -144,8 +147,8 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   },
 
   removeFromCart: (productId: number) => {
-    set(state => ({
-      cart: state.cart.filter(item => item.id !== productId),
+    set((state) => ({
+      cart: state.cart.filter((item) => item.id !== productId),
     }));
   },
 
@@ -155,9 +158,9 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       return;
     }
 
-    set(state => ({
-      cart: state.cart.map(item =>
-        item.id === productId ? { ...item, quantity } : item,
+    set((state) => ({
+      cart: state.cart.map((item) =>
+        item.id === productId ? { ...item, quantity } : item
       ),
     }));
   },
@@ -172,11 +175,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     if (cart.length === 0) {
       return {
         success: false,
-        message: 'ตะกร้าสินค้าว่างเปล่า',
+        message: "ตะกร้าสินค้าว่างเปล่า",
       };
     }
 
-    const productIds = cart.filter(item => item.id > 0).map(item => item.id);
+    const productIds = cart
+      .filter((item) => item.id > 0)
+      .map((item) => item.id);
 
     set({ checkoutLoading: true, error: null });
     try {
@@ -186,18 +191,18 @@ export const useProductStore = create<ProductStore>((set, get) => ({
         set({ cart: [], checkoutLoading: false });
         return {
           success: true,
-          message: 'สั่งซื้อสำเร็จ',
+          message: "สั่งซื้อสำเร็จ",
         };
       } else {
         set({ checkoutLoading: false, error: response.message || null });
         return {
           success: false,
-          message: response.message || 'เกิดข้อผิดพลาด',
+          message: response.message || "เกิดข้อผิดพลาด",
         };
       }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'เกิดข้อผิดพลาด';
+        error instanceof Error ? error.message : "เกิดข้อผิดพลาด";
       set({ checkoutLoading: false, error: errorMessage });
       return {
         success: false,
@@ -218,12 +223,12 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
   getCartItem: (productId: number) => {
     const { cart } = get();
-    return cart.find(item => item.id === productId);
+    return cart.find((item) => item.id === productId);
   },
 
-  getCartPromotionDetails: () => {
+  getCartPromotionDetails: (code: string) => {
     const { cart } = get();
-    return calculatePairDiscountPromotion(cart);
+    return calculatePairDiscountPromotion(cart, code);
   },
 }));
 
